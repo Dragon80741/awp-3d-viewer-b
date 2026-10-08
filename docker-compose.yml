@@ -1,0 +1,12 @@
+services:
+  3d_viewer_b:
+    container_name: 3d_viewer_b
+    image: 3d_viewer_b:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${VIEWER_PORT:-3104}:80"
+    volumes:
+      - "${G_DATA_HOST_PATH:-/mnt/3d_test}:/data:ro"
+    restart: unless-stopped

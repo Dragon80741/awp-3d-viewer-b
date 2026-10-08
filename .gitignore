@@ -1,0 +1,12 @@
+node_modules
+dist
+package
+*.zip
+*.tar.gz
+nwx.exe
+test_tiles
+PHU_Area_*
+server_extracted
+.env*.local
+.DS_Store
+Thumbs.db
