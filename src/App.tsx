@@ -229,11 +229,16 @@ export function App() {
         return
       }
       const ids = picked3d.map((p) => p.id)
-      st.requestHide3d({ kind: 'ghostOthers', ids, xray: true } as any)
+      st.requestHide3d({
+        kind: 'ghostOthers',
+        ids,
+        item: picked3dItem ?? undefined,
+        xray: true,
+      } as any)
       setIsXray(true)
       showToast(`${ids.length}개 부재 X-ray 투시 켜짐`, 'info')
     }
-  }, [isXray, picked3d])
+  }, [isXray, picked3d, picked3dItem])
 
   const s = () => store.getState()
 

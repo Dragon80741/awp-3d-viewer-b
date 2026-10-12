@@ -1,9 +1,9 @@
-<!-- USAGE.md — .tgz 로 받은 @humkyung/viewer3d 0.2.0 을 설치하고 쓰는 방법(외부 전달용). -->
-# @humkyung/viewer3d 사용 안내 (0.2.0)
+<!-- USAGE.md — .tgz 로 받은 @humkyung/viewer3d 0.2.1 을 설치하고 쓰는 방법(외부 전달용). -->
+# @humkyung/viewer3d 사용 안내 (0.2.1)
 
 nwx 타일 모델을 **보고 재는** React 3D 뷰어입니다. 이 문서는 `.tgz` 파일로 전달받은 패키지를 설치하고 쓰는 방법을 설명합니다.
 
-- 받은 파일: `humkyung-viewer3d-0.2.0.tgz`
+- 받은 파일: `humkyung-viewer3d-0.2.1.tgz`
 - 필요 환경: React 19, three.js 0.185, ES 모듈 번들러(Vite 권장)
 
 ---
@@ -30,11 +30,11 @@ nwx 타일 모델을 **보고 재는** React 3D 뷰어입니다. 이 문서는 `
 받은 `.tgz` 를 프로젝트 안(예: `vendor/`)에 두고 설치합니다.
 
 ```bash
-npm install ./vendor/humkyung-viewer3d-0.2.0.tgz
+npm install ./vendor/humkyung-viewer3d-0.2.1.tgz
 npm install react@^19 react-dom@^19 three@^0.185.1
 ```
 
-- `package.json` 에 `"@humkyung/viewer3d": "file:vendor/humkyung-viewer3d-0.2.0.tgz"` 로 기록됩니다. **`.tgz` 파일을 저장소에 함께 커밋해야** 다른 PC·CI 에서도 설치됩니다.
+- `package.json` 에 `"@humkyung/viewer3d": "file:vendor/humkyung-viewer3d-0.2.1.tgz"` 로 기록됩니다. **`.tgz` 파일을 저장소에 함께 커밋해야** 다른 PC·CI 에서도 설치됩니다.
 - `react`·`react-dom`·`three` 는 **peer 의존**입니다. 앱에 있는 한 벌을 씁니다.
 - 그 밖의 의존(`camera-controls`·`n8ao`·`three-mesh-bvh`·`zustand`)은 공개 npm 에서 자동으로 설치됩니다. 별도 토큰은 필요 없습니다.
 - 새 버전을 받으면 새 `.tgz` 로 다시 `npm install` 합니다.
@@ -134,6 +134,7 @@ function Toolbar() {
 | `requestHide3d('hide' \| 'isolate' \| 'ghost' \| 'showAll')` | 고른 것 숨기기·격리·반투명, 전체 되돌리기 |
 | `requestHide3d({ kind: 'toggle', ids })` | 지정한 조각만 껐다 켜기(선택과 무관) |
 | `requestHide3d({ kind: 'ghostOthers', ids, xray: true })` | **X-ray** — 지정한 조각 말고 나머지를 면 없이 옅은 청회색 선으로. 지정한 조각은 모델 색 그대로 늘 보이고, 앞에 있는 부재의 선만 그 위로 지나가 앞뒤가 읽힌다. 켜져 있는 동안은 지정한 조각만 골라지고 가리켜진다. `xray` 를 빼면 나머지를 원래 색 반투명으로 |
+| `requestHide3d({ kind: 'ghostOthers', ids, item, xray: true })` | 트리 노드(`item`) 기준 **X-ray**. 그 노드 아래 조각 전부가 지정한 조각이 되고, 뒤에 받는 타일의 그 아래 조각도 이어진다 |
 | `requestHide3d('restore')` | X-ray·`ghostOthers` 를 걸기 직전의 가시성으로 되돌리기 |
 | `setGhostOpacity(0~1)` | 반투명 정도 |
 | `requestPick3d(ids)` | 조각 번호로 고르기 |
@@ -161,12 +162,15 @@ function Toolbar() {
 ```tsx
 function XrayButtons() {
   const picked = useViewerState(store, (s) => s.picked3d)
+  const pickedItem = useViewerState(store, (s) => s.picked3dItem)   // 트리에서 고른 노드(없으면 null)
   const s = () => store.getState()
   return (
     <>
-      {/* 고른 부재로 X-ray 를 건다 */}
+      {/* 고른 부재로 X-ray 를 건다 — 트리에서 노드를 골랐으면 item 도 넘겨 그 노드 아래 전부를 남긴다 */}
       <button disabled={!picked.length}
-              onClick={() => s().requestHide3d({ kind: 'ghostOthers', ids: picked.map((p) => p.id), xray: true })}>
+              onClick={() => s().requestHide3d({
+                kind: 'ghostOthers', ids: picked.map((p) => p.id), item: pickedItem ?? undefined, xray: true,
+              })}>
         X-ray
       </button>
       {/* 걸기 직전의 가시성으로 되돌린다 */}
@@ -184,6 +188,7 @@ function XrayButtons() {
 | 뒤에 받은 타일 | 새로 온 구역에도 같은 X-ray 가 걸립니다 |
 
 - `ids` 는 조각 번호입니다. `picked3d` 의 `id`, 또는 트리에서 얻은 번호를 넘깁니다.
+- **트리에서 노드를 골라 X-ray 를 켤 때는 `item`(`picked3dItem`)을 함께 넘기세요.** 조각 번호만 넘기면 그 순간 받아 둔 조각만 지정되어, 아직 받지 않은 타일에 든 자식 형상은 선으로만 그려집니다. `item` 을 주면 그 노드 아래 조각 전부가 지정되고, 뒤에 받는 타일에 든 자식도 이어집니다.
 - 끄는 방법은 둘입니다. `requestHide3d('restore')` 는 **X-ray 를 처음 걸기 직전**으로 되돌립니다(그 사이 다른 부재로 다시 걸어도 마찬가지). `showAll` 은 숨김·반투명까지 모두 켭니다. 숨기기·격리·반투명 같은 다른 가시성 명령을 하면 X-ray 표시는 풀리고, 나머지 부재는 원래 색 반투명으로 남습니다(`restore` 로는 여전히 걸기 직전으로 돌아갑니다).
 - `xray` 를 빼면(`{ kind: 'ghostOthers', ids }`) 나머지를 **원래 색 반투명**으로 그리는 예전 동작입니다. 반투명 정도(`setGhostOpacity`)는 이쪽에만 걸리고, X-ray 선의 옅기에는 걸리지 않습니다.
 - 확장 컴포넌트에서는 `useViewerRuntime().focusPieces(ids)` 로도 켜고 `focusPieces(null)` 로 끕니다(9장).
@@ -354,11 +359,12 @@ const translate = createTranslate('en', { 'viewer3d.tree.search': 'Search the mo
 </Viewer3D>
 ```
 
-확장은 런타임으로 X-ray 를 걸 수도 있습니다. `focusPieces(ids)` 는 `requestHide3d({ kind: 'ghostOthers', ids, xray: true })` 와 같고, `focusPieces(null)` 은 `requestHide3d('restore')` 와 같습니다.
+확장은 런타임으로 X-ray 를 걸 수도 있습니다. `focusPieces(ids)` 는 `requestHide3d({ kind: 'ghostOthers', ids, xray: true })` 와 같고, `focusPieces(ids, item)` 은 노드 기준(`item` 포함)으로 겁니다. `focusPieces(null)` 은 `requestHide3d('restore')` 와 같습니다.
 
 ```tsx
 const { focusPieces } = useViewerRuntime()
 focusPieces([12, 13])   // 12·13 번 조각만 또렷이, 나머지는 회색
+focusPieces([], 42)     // 트리 노드 42 아래 전부를 또렷이(뒤에 받는 타일 포함)
 focusPieces(null)       // 걸기 직전으로
 ```
 

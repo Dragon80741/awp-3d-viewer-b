@@ -3,7 +3,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Copy dependency manifests and the local tgz package
-COPY package.json package-lock.json humkyung-viewer3d-0.2.0.tgz ./
+COPY package.json package-lock.json humkyung-viewer3d-0.2.1.tgz ./
 RUN npm ci
 
 # Copy application source code and build
