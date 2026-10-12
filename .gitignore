@@ -1,12 +1,40 @@
-node_modules
-dist
-package
-*.zip
-*.tar.gz
-nwx.exe
-test_tiles
-PHU_Area_*
-server_extracted
-.env*.local
+# Dependencies
+node_modules/
+package/
+
+# Production build outputs
+dist/
+dist-ssr/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS & Editor files
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
+
+# Archives & Deployment packages
+*.zip
+*.tar.gz
+*.tgz
+!humkyung-viewer3d-0.2.1.tgz
+server_extracted/
+
+# Model tiles & Data files (heavy assets stored in NAS)
+*_TILES/
+PHU_Area_*
+AMIRAL_*
+test_tiles/
+nwx.exe
+*.nwd
+*.rvm
+*.att
+
+# Local environment files
+.env*.local
