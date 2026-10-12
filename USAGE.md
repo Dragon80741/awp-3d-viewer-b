@@ -1,9 +1,9 @@
-<!-- USAGE.md — .tgz 로 받은 @humkyung/viewer3d 0.2.1 을 설치하고 쓰는 방법(외부 전달용). -->
-# @humkyung/viewer3d 사용 안내 (0.2.1)
+<!-- USAGE.md — .tgz 로 받은 @humkyung/viewer3d 0.2.3 을 설치하고 쓰는 방법(외부 전달용). -->
+# @humkyung/viewer3d 사용 안내 (0.2.3)
 
 nwx 타일 모델을 **보고 재는** React 3D 뷰어입니다. 이 문서는 `.tgz` 파일로 전달받은 패키지를 설치하고 쓰는 방법을 설명합니다.
 
-- 받은 파일: `humkyung-viewer3d-0.2.1.tgz`
+- 받은 파일: `humkyung-viewer3d-0.2.3.tgz`
 - 필요 환경: React 19, three.js 0.185, ES 모듈 번들러(Vite 권장)
 
 ---
@@ -30,11 +30,11 @@ nwx 타일 모델을 **보고 재는** React 3D 뷰어입니다. 이 문서는 `
 받은 `.tgz` 를 프로젝트 안(예: `vendor/`)에 두고 설치합니다.
 
 ```bash
-npm install ./vendor/humkyung-viewer3d-0.2.1.tgz
+npm install ./vendor/humkyung-viewer3d-0.2.3.tgz
 npm install react@^19 react-dom@^19 three@^0.185.1
 ```
 
-- `package.json` 에 `"@humkyung/viewer3d": "file:vendor/humkyung-viewer3d-0.2.1.tgz"` 로 기록됩니다. **`.tgz` 파일을 저장소에 함께 커밋해야** 다른 PC·CI 에서도 설치됩니다.
+- `package.json` 에 `"@humkyung/viewer3d": "file:vendor/humkyung-viewer3d-0.2.3.tgz"` 로 기록됩니다. **`.tgz` 파일을 저장소에 함께 커밋해야** 다른 PC·CI 에서도 설치됩니다.
 - `react`·`react-dom`·`three` 는 **peer 의존**입니다. 앱에 있는 한 벌을 씁니다.
 - 그 밖의 의존(`camera-controls`·`n8ao`·`three-mesh-bvh`·`zustand`)은 공개 npm 에서 자동으로 설치됩니다. 별도 토큰은 필요 없습니다.
 - 새 버전을 받으면 새 `.tgz` 로 다시 `npm install` 합니다.
