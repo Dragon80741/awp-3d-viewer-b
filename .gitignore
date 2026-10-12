@@ -23,7 +23,7 @@ Thumbs.db
 *.zip
 *.tar.gz
 *.tgz
-!humkyung-viewer3d-0.2.1.tgz
+!vendor/*.tgz
 server_extracted/
 
 # Model tiles & Data files (heavy assets stored in NAS)
