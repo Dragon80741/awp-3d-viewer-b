@@ -316,14 +316,15 @@ export function findAwpItemByNode(nameOrPath: string | null | undefined): AwpLin
   if (!nameOrPath) return undefined
   const clean = nameOrPath.trim().toUpperCase()
   const cleanNoSlash = clean.replace(/^\/+/, '')
+  if (cleanNoSlash.length < 5) return undefined
   return AWP_RAW_LIST.find((it) => {
     const itLine = (it.lineName || '').toUpperCase()
     const itLineNoSlash = itLine.replace(/^\/+/, '')
     const itIso = (it.isoNo || '').toUpperCase()
 
-    if (itLine && (clean.includes(itLine) || itLine.includes(clean))) return true
-    if (itLineNoSlash && (cleanNoSlash.includes(itLineNoSlash) || itLineNoSlash.includes(cleanNoSlash))) return true
-    if (itIso && (clean.includes(itIso) || itIso.includes(clean))) return true
+    if (itLine && clean.includes(itLine)) return true
+    if (itLineNoSlash && cleanNoSlash.includes(itLineNoSlash)) return true
+    if (itIso && clean.includes(itIso)) return true
     return false
   })
 }

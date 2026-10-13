@@ -12,6 +12,7 @@ export type AwpSelectTagsMessage = {
   iwp?: string | null
   focusCamera?: boolean // default: true
   isolate?: boolean // default: false
+  xray?: boolean // default: false
 }
 
 export type AwpSetWorkpackageInfoMessage = {
@@ -36,11 +37,35 @@ export type AwpClearSelectionMessage = {
   type: 'AWP_CLEAR_SELECTION'
 }
 
+export type AwpSetTreePanelMessage = {
+  type: 'AWP_SET_TREE_PANEL'
+  show: boolean
+}
+
+export type AwpToggleTreePanelMessage = {
+  type: 'AWP_TOGGLE_TREE_PANEL'
+}
+
+export type AwpSetXrayMessage = {
+  type: 'AWP_SET_XRAY'
+  xray?: boolean
+}
+
+export type AwpToggleXrayMessage = {
+  type: 'AWP_TOGGLE_XRAY'
+}
+
 export type AwpInboundMessage =
   | AwpSelectTagsMessage
   | AwpSetWorkpackageInfoMessage
   | AwpSelectItemsMessage
   | AwpClearSelectionMessage
+  | AwpSetTreePanelMessage
+  | AwpToggleTreePanelMessage
+  | AwpSetXrayMessage
+  | AwpToggleXrayMessage
+  | { type: 'CAPTURE_3D_SNAPSHOT' }
+  | { type: 'CAPTURE_3D_VIEW' }
 
 export type ViewerOutboundSelectedEvent = {
   type: 'VIEWER_OBJECT_SELECTED'
@@ -147,6 +172,10 @@ export function isAwpInboundMessage(data: unknown): data is AwpInboundMessage {
     candidate.type === 'AWP_SET_WORKPACKAGE_INFO' ||
     candidate.type === 'AWP_SELECT_ITEMS' ||
     candidate.type === 'AWP_CLEAR_SELECTION' ||
+    candidate.type === 'AWP_SET_TREE_PANEL' ||
+    candidate.type === 'AWP_TOGGLE_TREE_PANEL' ||
+    candidate.type === 'AWP_SET_XRAY' ||
+    candidate.type === 'AWP_TOGGLE_XRAY' ||
     candidate.type === 'CAPTURE_3D_SNAPSHOT' ||
     candidate.type === 'CAPTURE_3D_VIEW'
   )

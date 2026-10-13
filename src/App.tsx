@@ -27,7 +27,12 @@ export function App() {
   const [shadow, setShadow] = useState(false)
   const [toast, setToast] = useState<{ message: string; level: string } | null>(null)
   const [isEmbedded, setIsEmbedded] = useState(false)
-  const [showTreePanel, setShowTreePanel] = useState(true)
+  const [showTreePanel, setShowTreePanel] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    const p = new URLSearchParams(window.location.search)
+    const t = p.get('tree')
+    return t === 'true' || t === '1' || t === 'on'
+  })
   const [showPropsPanel, setShowPropsPanel] = useState(true)
   const [awpInfo, setAwpInfo] = useState<{ cwp: string; iwp: string }>({ cwp: '-', iwp: '-' })
   const [isXray, setIsXray] = useState(false)
@@ -38,7 +43,7 @@ export function App() {
   const picked3d = useViewerState(store, (s) => s.picked3d)
   const picked3dItem = useViewerState(store, (s) => s.picked3dItem)
 
-  const pendingTagsRef = useRef<{ tags: string[]; isolate?: boolean; focusCamera?: boolean } | null>(null)
+  const pendingTagsRef = useRef<{ tags: string[]; isolate?: boolean; focusCamera?: boolean; xray?: boolean } | null>(null)
 
   // 1. URL Query parameter handling (?model=..., ?tags=..., ?embed=true)
   useEffect(() => {
@@ -100,9 +105,9 @@ export function App() {
 
   // 3. Selection helper for given tags
   const applyTagsSelection = useCallback(
-    (tags: string[], focusCamera = true, isolate = false) => {
+    (tags: string[], focusCamera = true, isolate = false, xray = false) => {
       if (!treeIndex) return
-      console.log('[AWP Bridge] Searching tags:', tags)
+      console.log('[AWP Bridge] Searching tags:', tags, 'xray:', xray)
       const { items, pieces } = findItemsAndPiecesByTags(treeIndex, tags)
 
       if (pieces.length > 0) {
@@ -110,11 +115,23 @@ export function App() {
         s.requestPick3d(pieces, items[0] ?? null)
         if (isolate) {
           s.requestHide3d('isolate')
+          setIsXray(false)
+        } else if (xray) {
+          s.requestHide3d({
+            kind: 'ghostOthers',
+            ids: pieces,
+            item: items[0] ?? undefined,
+            xray: true,
+          } as any)
+          setIsXray(true)
+        } else {
+          s.requestHide3d('showAll')
+          setIsXray(false)
         }
         if (focusCamera) {
           s.requestFit3d(pieces)
         }
-        showToast(`${tags.length}개 태그 (${pieces.length}개 부재) 선택됨`, 'info')
+        showToast(`${tags.length}개 태그 (${pieces.length}개 부재) 선택됨${xray ? ' (X-ray 뷰)' : ''}`, 'info')
       } else {
         console.warn('[AWP Bridge] No matching pieces found for tags:', tags)
         showToast(`태그 [${tags.join(', ')}]에 해당하는 부재를 찾지 못했습니다.`, 'warn')
@@ -136,9 +153,9 @@ export function App() {
     })
 
     if (pendingTagsRef.current) {
-      const { tags, focusCamera, isolate } = pendingTagsRef.current
+      const { tags, focusCamera, isolate, xray } = pendingTagsRef.current
       pendingTagsRef.current = null
-      applyTagsSelection(tags, focusCamera, isolate)
+      applyTagsSelection(tags, focusCamera, isolate, xray)
     }
   }, [treeIndex, applyTagsSelection])
 
@@ -171,6 +188,24 @@ export function App() {
         return
       }
 
+      if (data.type === 'AWP_SET_TREE_PANEL') {
+        setShowTreePanel(Boolean(data.show))
+        return
+      }
+      if (data.type === 'AWP_TOGGLE_TREE_PANEL') {
+        setShowTreePanel((prev) => !prev)
+        return
+      }
+      if (data.type === 'AWP_SET_XRAY') {
+        const target = typeof data.xray === 'boolean' ? data.xray : !isXray
+        setXrayState(target)
+        return
+      }
+      if (data.type === 'AWP_TOGGLE_XRAY') {
+        setXrayState(!isXray)
+        return
+      }
+
       if (data.type === 'AWP_SELECT_TAGS') {
         if (data.cwp || data.iwp) {
           setAwpInfo({
@@ -179,13 +214,15 @@ export function App() {
           })
         }
         const tags = data.tags || []
+        const isXrayReq = Boolean(data.xray)
         if (treeIndex) {
-          applyTagsSelection(tags, data.focusCamera !== false, Boolean(data.isolate))
+          applyTagsSelection(tags, data.focusCamera !== false, Boolean(data.isolate), isXrayReq)
         } else {
           pendingTagsRef.current = {
             tags,
             focusCamera: data.focusCamera !== false,
             isolate: Boolean(data.isolate),
+            xray: isXrayReq,
           }
         }
       } else if (data.type === 'AWP_CLEAR_SELECTION') {
@@ -235,28 +272,33 @@ export function App() {
     })
   }, [picked3d, picked3dItem])
 
-  const toggleXray = useCallback(() => {
+  const setXrayState = useCallback((targetXray: boolean) => {
     const st = store.getState()
-    if (isXray) {
+    if (!targetXray) {
       st.requestHide3d('restore')
       setIsXray(false)
       showToast('X-ray 모드 해제됨', 'info')
     } else {
-      if (picked3d.length === 0) {
+      const currentPicked = store.getState().picked3d
+      if (currentPicked.length === 0) {
         showToast('X-ray를 적용할 부재를 먼저 선택해주세요.', 'warn')
         return
       }
-      const ids = picked3d.map((p) => p.id)
+      const ids = currentPicked.map((p) => p.id)
       st.requestHide3d({
         kind: 'ghostOthers',
         ids,
-        item: picked3dItem ?? undefined,
+        item: store.getState().picked3dItem ?? undefined,
         xray: true,
       } as any)
       setIsXray(true)
       showToast(`${ids.length}개 부재 X-ray 투시 켜짐`, 'info')
     }
-  }, [isXray, picked3d, picked3dItem])
+  }, [])
+
+  const toggleXray = useCallback(() => {
+    setXrayState(!isXray)
+  }, [isXray, setXrayState])
 
   const s = () => store.getState()
 
