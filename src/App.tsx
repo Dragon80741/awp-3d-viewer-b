@@ -15,8 +15,7 @@ import {
   sendToParentPlatform,
   findItemsAndPiecesByTags,
 } from './viewerBridge'
-import { AwpPanel } from './components/AwpPanel'
-import type { AwpLineItem, AwpIwpGroup, AwpCwpGroup } from './data/awpData'
+import { AwpPropertyPane } from './components/AwpPropertyPane'
 
 const store = createViewerStore()
 
@@ -30,7 +29,6 @@ export function App() {
   const [isEmbedded, setIsEmbedded] = useState(false)
   const [showTreePanel, setShowTreePanel] = useState(true)
   const [showPropsPanel, setShowPropsPanel] = useState(true)
-  const [rightTab, setRightTab] = useState<'props' | 'awp'>('awp')
   const [isXray, setIsXray] = useState(false)
 
   const measureMode = useViewerState(store, (s) => s.measureMode)
@@ -122,37 +120,6 @@ export function App() {
       }
     },
     [treeIndex],
-  )
-
-  const pickedNodeName = useMemo(() => {
-    if (!treeIndex || picked3dItem == null) return null
-    return treeIndex.tree.name[picked3dItem] || null
-  }, [treeIndex, picked3dItem])
-
-  const handleSelectLine = useCallback(
-    (lineItem: AwpLineItem, isolate = false) => {
-      const lineTag = lineItem.lineName.replace(/^\/+/, '') || lineItem.lineName
-      applyTagsSelection([lineTag], true, isolate)
-    },
-    [applyTagsSelection],
-  )
-
-  const handleSelectIwp = useCallback(
-    (iwp: AwpIwpGroup, isolate = false) => {
-      const tags = iwp.lines.map((l) => l.lineName.replace(/^\/+/, '') || l.lineName).filter(Boolean)
-      applyTagsSelection(tags, true, isolate)
-    },
-    [applyTagsSelection],
-  )
-
-  const handleSelectCwp = useCallback(
-    (cwp: AwpCwpGroup, isolate = false) => {
-      const tags = cwp.iwps
-        .flatMap((i) => i.lines.map((l) => l.lineName.replace(/^\/+/, '') || l.lineName))
-        .filter(Boolean)
-      applyTagsSelection(tags, true, isolate)
-    },
-    [applyTagsSelection],
   )
 
   // 4. When treeIndex is ready, send VIEWER_READY and apply any pending tags
@@ -433,9 +400,9 @@ export function App() {
           <button
             onClick={() => setShowPropsPanel((v) => !v)}
             style={btnStyle(showPropsPanel)}
-            title="우측 속성/AWP 패널 토글"
+            title="우측 속성 정보 패널 토글"
           >
-            속성/AWP {showPropsPanel ? 'ON' : 'OFF'}
+            속성 {showPropsPanel ? 'ON' : 'OFF'}
           </button>
         </div>
       </header>
@@ -559,89 +526,41 @@ export function App() {
           )}
         </div>
 
-        {/* Right Panel: Property Pane / AWP Tab */}
+        {/* Right Panel: Property Pane (속성 정보 및 내장 AWP 탭) */}
         {showPropsPanel && (
           <aside
             style={{
-              width: rightTab === 'awp' ? 380 : 340,
+              width: 340,
               display: 'flex',
               flexDirection: 'column',
               backgroundColor: '#1f2937',
               borderLeft: '1px solid #374151',
               height: '100%',
               flexShrink: 0,
-              transition: 'width 0.15s ease',
             }}
           >
-            {/* Tab Header */}
             <div
               style={{
-                display: 'flex',
+                padding: '0.4rem 0.6rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: '#9ca3af',
                 backgroundColor: '#111827',
                 borderBottom: '1px solid #374151',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
               }}
             >
-              <button
-                onClick={() => setRightTab('props')}
-                style={{
-                  flex: 1,
-                  padding: '0.45rem 0.6rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  backgroundColor: rightTab === 'props' ? '#1f2937' : '#111827',
-                  color: rightTab === 'props' ? '#f3f4f6' : '#9ca3af',
-                  border: 'none',
-                  borderBottom: rightTab === 'props' ? '2px solid #0284c7' : '2px solid transparent',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.35rem',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <span>속성 정보</span>
-                {picked3d.length > 0 && (
-                  <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
-                    ({picked3d.length})
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setRightTab('awp')}
-                style={{
-                  flex: 1,
-                  padding: '0.45rem 0.6rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  backgroundColor: rightTab === 'awp' ? '#1f2937' : '#111827',
-                  color: rightTab === 'awp' ? '#f3f4f6' : '#9ca3af',
-                  border: 'none',
-                  borderBottom: rightTab === 'awp' ? '2px solid #0284c7' : '2px solid transparent',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.35rem',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <span>AWP (CWP/IWP)</span>
-              </button>
-            </div>
-
-            {/* Tab Body */}
-            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-              {rightTab === 'props' ? (
-                <PropertyPane store={store} fetch={source?.fetch} />
-              ) : (
-                <AwpPanel
-                  onSelectLine={handleSelectLine}
-                  onSelectIwp={handleSelectIwp}
-                  onSelectCwp={handleSelectCwp}
-                  pickedItemName={pickedNodeName}
-                />
+              <span>속성 정보</span>
+              {picked3d.length > 0 && (
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8' }}>
+                  {picked3d.length}개 선택
+                </span>
               )}
+            </div>
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <AwpPropertyPane store={store} fetch={source?.fetch} />
             </div>
           </aside>
         )}
