@@ -4,10 +4,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const nasBase = '\\\\Doftech_NAS\\AWP_Shared\\3d_test'
+const localPhu = path.resolve(process.cwd(), 'PHU_Area_E3D_TILES')
 const models: Record<string, string> = {
   '/amiral': path.join(nasBase, 'AMIRAL_NWX_TILES'),
-  '/phu': fs.existsSync('C:\\Projects\\3d_viewer_b\\PHU_Area_E3D_TILES')
-    ? 'C:\\Projects\\3d_viewer_b\\PHU_Area_E3D_TILES'
+  '/phu': fs.existsSync(localPhu)
+    ? localPhu
     : path.join(nasBase, 'PHU_Area_E3D_TILES'),
   '/phu_all': path.join(nasBase, 'PHU_Area_ALL_TILES'),
 }
