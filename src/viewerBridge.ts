@@ -8,8 +8,19 @@ import { pathOf } from '@humkyung/viewer3d'
 export type AwpSelectTagsMessage = {
   type: 'AWP_SELECT_TAGS'
   tags: string[]
+  cwp?: string | null
+  iwp?: string | null
   focusCamera?: boolean // default: true
   isolate?: boolean // default: false
+}
+
+export type AwpSetWorkpackageInfoMessage = {
+  type: 'AWP_SET_WORKPACKAGE_INFO'
+  payload: {
+    cwp?: string | null
+    iwp?: string | null
+    line?: string | null
+  }
 }
 
 export type AwpSelectItemsMessage = {
@@ -27,6 +38,7 @@ export type AwpClearSelectionMessage = {
 
 export type AwpInboundMessage =
   | AwpSelectTagsMessage
+  | AwpSetWorkpackageInfoMessage
   | AwpSelectItemsMessage
   | AwpClearSelectionMessage
 
@@ -132,6 +144,7 @@ export function isAwpInboundMessage(data: unknown): data is AwpInboundMessage {
   const candidate = data as { type?: unknown }
   return (
     candidate.type === 'AWP_SELECT_TAGS' ||
+    candidate.type === 'AWP_SET_WORKPACKAGE_INFO' ||
     candidate.type === 'AWP_SELECT_ITEMS' ||
     candidate.type === 'AWP_CLEAR_SELECTION' ||
     candidate.type === 'CAPTURE_3D_SNAPSHOT' ||

@@ -314,12 +314,16 @@ export function getAwpCwpGroups(): AwpCwpGroup[] {
 /** 3D 선택 부재명이나 경로가 주어졌을 때 매칭되는 AWP 라인 항목 찾기 */
 export function findAwpItemByNode(nameOrPath: string | null | undefined): AwpLineItem | undefined {
   if (!nameOrPath) return undefined
-  const clean = nameOrPath.trim()
+  const clean = nameOrPath.trim().toUpperCase()
+  const cleanNoSlash = clean.replace(/^\/+/, '')
   return AWP_RAW_LIST.find((it) => {
-    if (it.lineName && clean.includes(it.lineName)) return true
-    if (it.isoNo && clean.includes(it.isoNo)) return true
-    const lineTag = it.lineName.replace(/^\/+/, '')
-    if (lineTag && clean.includes(lineTag)) return true
+    const itLine = (it.lineName || '').toUpperCase()
+    const itLineNoSlash = itLine.replace(/^\/+/, '')
+    const itIso = (it.isoNo || '').toUpperCase()
+
+    if (itLine && (clean.includes(itLine) || itLine.includes(clean))) return true
+    if (itLineNoSlash && (cleanNoSlash.includes(itLineNoSlash) || itLineNoSlash.includes(cleanNoSlash))) return true
+    if (itIso && (clean.includes(itIso) || itIso.includes(clean))) return true
     return false
   })
 }

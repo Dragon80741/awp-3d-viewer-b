@@ -17,9 +17,10 @@ export interface AwpPropertyPaneProps {
   store: ViewerStore
   fetch?: (url: string, init?: RequestInit) => Promise<Response>
   className?: string
+  awpInfo?: { cwp: string; iwp: string }
 }
 
-export function AwpPropertyPane({ store, className }: AwpPropertyPaneProps) {
+export function AwpPropertyPane({ store, className, awpInfo }: AwpPropertyPaneProps) {
   const picked3d = useViewerState(store, (s) => s.picked3d)
   const picked3dItem = useViewerState(store, (s) => s.picked3dItem)
   const treeIndex = useViewerState(store, (s) => s.tree3d)
@@ -98,6 +99,15 @@ export function AwpPropertyPane({ store, className }: AwpPropertyPaneProps) {
         match = findAwpItemByNode(val)
         if (match) break
       }
+      if (!match) {
+        const otherProps = propsOf(treeIndex.tree, targetItem)
+        for (const [, , val] of otherProps) {
+          if (typeof val === 'string' && val.length > 3) {
+            match = findAwpItemByNode(val)
+            if (match) break
+          }
+        }
+      }
     }
     return match
   }, [treeIndex, targetItem, path])
@@ -135,9 +145,18 @@ export function AwpPropertyPane({ store, className }: AwpPropertyPaneProps) {
     }
 
     // 4-3. AWP Tab: CWP / IWP 두 줄 (사용자 요구사항)
+    const resolvedCwp =
+      (awpInfo && awpInfo.cwp && awpInfo.cwp !== '-' ? awpInfo.cwp : null) ??
+      (matchedAwp?.cwpNo && matchedAwp.cwpNo !== '-' ? matchedAwp.cwpNo : null) ??
+      '-'
+    const resolvedIwp =
+      (awpInfo && awpInfo.iwp && awpInfo.iwp !== '-' ? awpInfo.iwp : null) ??
+      (matchedAwp?.iwpNo && matchedAwp.iwpNo !== '-' ? matchedAwp.iwpNo : null) ??
+      '-'
+
     const awpList: [string, string][] = [
-      ['CWP', matchedAwp ? matchedAwp.cwpNo : '-'],
-      ['IWP', matchedAwp ? matchedAwp.iwpNo : '-'],
+      ['CWP', resolvedCwp],
+      ['IWP', resolvedIwp],
     ]
     groupsMap.set('AWP', awpList)
 
@@ -150,7 +169,7 @@ export function AwpPropertyPane({ store, className }: AwpPropertyPaneProps) {
       })
     }
     return result
-  }, [treeIndex, targetItem, matchedAwp])
+  }, [treeIndex, targetItem, matchedAwp, awpInfo])
 
   // Determine current active tab
   const currentActiveTab = useMemo(() => {

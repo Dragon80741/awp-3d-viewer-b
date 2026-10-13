@@ -29,6 +29,7 @@ export function App() {
   const [isEmbedded, setIsEmbedded] = useState(false)
   const [showTreePanel, setShowTreePanel] = useState(true)
   const [showPropsPanel, setShowPropsPanel] = useState(true)
+  const [awpInfo, setAwpInfo] = useState<{ cwp: string; iwp: string }>({ cwp: '-', iwp: '-' })
   const [isXray, setIsXray] = useState(false)
 
   const measureMode = useViewerState(store, (s) => s.measureMode)
@@ -161,7 +162,22 @@ export function App() {
         return
       }
 
+      if (data.type === 'AWP_SET_WORKPACKAGE_INFO') {
+        const payload = data.payload || {}
+        setAwpInfo({
+          cwp: payload.cwp || '-',
+          iwp: payload.iwp || '-',
+        })
+        return
+      }
+
       if (data.type === 'AWP_SELECT_TAGS') {
+        if (data.cwp || data.iwp) {
+          setAwpInfo({
+            cwp: data.cwp || '-',
+            iwp: data.iwp || '-',
+          })
+        }
         const tags = data.tags || []
         if (treeIndex) {
           applyTagsSelection(tags, data.focusCamera !== false, Boolean(data.isolate))
@@ -173,6 +189,7 @@ export function App() {
           }
         }
       } else if (data.type === 'AWP_CLEAR_SELECTION') {
+        setAwpInfo({ cwp: '-', iwp: '-' })
         const s = store.getState()
         s.requestPick3d([])
         s.requestHide3d('showAll')
@@ -560,7 +577,7 @@ export function App() {
               )}
             </div>
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-              <AwpPropertyPane store={store} fetch={source?.fetch} />
+              <AwpPropertyPane store={store} fetch={source?.fetch} awpInfo={awpInfo} />
             </div>
           </aside>
         )}
