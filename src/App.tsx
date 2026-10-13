@@ -589,9 +589,9 @@ export function App() {
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   backgroundColor: rightTab === 'props' ? '#1f2937' : '#111827',
-                  color: rightTab === 'props' ? '#38bdf8' : '#9ca3af',
+                  color: rightTab === 'props' ? '#f3f4f6' : '#9ca3af',
                   border: 'none',
-                  borderBottom: rightTab === 'props' ? '2px solid #38bdf8' : '2px solid transparent',
+                  borderBottom: rightTab === 'props' ? '2px solid #0284c7' : '2px solid transparent',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -602,16 +602,8 @@ export function App() {
               >
                 <span>속성 정보</span>
                 {picked3d.length > 0 && (
-                  <span
-                    style={{
-                      fontSize: '0.65rem',
-                      color: '#38bdf8',
-                      backgroundColor: 'rgba(56, 189, 248, 0.15)',
-                      padding: '0.05rem 0.3rem',
-                      borderRadius: '0.2rem',
-                    }}
-                  >
-                    {picked3d.length}
+                  <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>
+                    ({picked3d.length})
                   </span>
                 )}
               </button>
@@ -623,9 +615,9 @@ export function App() {
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   backgroundColor: rightTab === 'awp' ? '#1f2937' : '#111827',
-                  color: rightTab === 'awp' ? '#38bdf8' : '#9ca3af',
+                  color: rightTab === 'awp' ? '#f3f4f6' : '#9ca3af',
                   border: 'none',
-                  borderBottom: rightTab === 'awp' ? '2px solid #38bdf8' : '2px solid transparent',
+                  borderBottom: rightTab === 'awp' ? '2px solid #0284c7' : '2px solid transparent',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -634,19 +626,7 @@ export function App() {
                   transition: 'all 0.15s',
                 }}
               >
-                <span>AWP</span>
-                <span
-                  style={{
-                    fontSize: '0.62rem',
-                    color: '#34d399',
-                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                    padding: '0.05rem 0.3rem',
-                    borderRadius: '0.2rem',
-                    fontWeight: 700,
-                  }}
-                >
-                  CWP/IWP
-                </span>
+                <span>AWP (CWP/IWP)</span>
               </button>
             </div>
 
